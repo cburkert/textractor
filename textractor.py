@@ -117,6 +117,7 @@ def textract(zip_file: IO, main_doc: str, output_dir: str,
         click.echo("=== FAILURE: Test build failed! ===", err=True)
         if zip_file:
             os.remove(zip_file.name)  # remove to avoid accidental usage
+        sys.exit(res.returncode)
     else:
         click.echo("=== SUCCESS: Test build succeeded! ===")
 
