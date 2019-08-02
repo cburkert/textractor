@@ -46,6 +46,11 @@ def textract(zip_file: IO, main_doc: str, output_dir: str,
                    % (dep_path, main_doc), err=True)
         sys.exit(2)
 
+    if os.path.exists(output_dir):  # remove output_dir if already present
+        click.confirm("This will remove all content in %s. Proceed?"
+                      % output_dir, abort=True)
+        shutil.rmtree(output_dir)
+
     # identify local assets
     assets = []
     assets.append(main_doc)
