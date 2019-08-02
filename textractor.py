@@ -76,6 +76,7 @@ def textract(zip_file: IO, main_doc: str, output_dir: str,
     abs_assets = [os.path.abspath(a) for a in assets]
     click.echo(os.linesep.join(assets))
 
+    # ignore function for copytree
     def ignore_non_assets(src, names):
         ignores = []
         for name in names:
@@ -86,9 +87,7 @@ def textract(zip_file: IO, main_doc: str, output_dir: str,
                 ignores.append(name)
         return ignores
 
-    zip_builder = None
-    if zip_file:
-        zip_builder = zipfile.ZipFile(zip_file, "w")
+    zip_builder = zipfile.ZipFile(zip_file, "w")
 
     # custom copy function that both copies the files to a clear directory
     # and adds them to a zip archive if asked to
@@ -104,9 +103,8 @@ def textract(zip_file: IO, main_doc: str, output_dir: str,
         copy_function=copy_and_zip,
     )
 
-    if zip_file:
-        zip_builder.close()
-        zip_file.close()
+    zip_builder.close()
+    zip_file.close()
 
     # test LaTeX build on clean copy
     oldwd = os.getcwd()
@@ -115,8 +113,7 @@ def textract(zip_file: IO, main_doc: str, output_dir: str,
     os.chdir(oldwd)
     if res.returncode != 0:
         click.echo("=== FAILURE: Test build failed! ===", err=True)
-        if zip_file:
-            os.remove(zip_file.name)  # remove to avoid accidental usage
+        os.remove(zip_file.name)  # remove to avoid accidental usage
         sys.exit(res.returncode)
     else:
         click.echo("=== SUCCESS: Test build succeeded! ===")
