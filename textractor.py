@@ -10,12 +10,7 @@ from typing import IO
 import zipfile
 
 
-PATH_REGEX = r"\*\{(?P<type>file|class|package)\}\s*\{(?P<path>[^\}]+)\}"
-IMPLICIT_EXT = {
-    "class": ("cls",),
-    "file": ("tex",),
-    "package": (),
-}
+PATH_REGEX = r"^INPUT\s+(?P<path>.*)$"
 
 
 def prepare_output_dir(ctx, param, value):
@@ -43,16 +38,21 @@ def prepare_output_dir(ctx, param, value):
 def textract(ctx, zip_file: IO, main_doc: str, output_dir: str,
              bib_file: str) -> None:
     """Extracting build-essential files from a LaTeX project and zip them."""
+    # record dependency files
+    res = subprocess.run(["pdflatex", "-recorder", "-draftmode",
+                          "-halt-on-error", main_doc])
+    if res.returncode != 0:
+        click.echo("=== FAILURE: Recording dependencies failed! ===", err=True)
+        sys.exit(res.returncode)
+
     # locate dependency file
     base, ext = os.path.splitext(main_doc)
-    dep_path = base + os.path.extsep + "dep"
+    dep_path = base + os.path.extsep + "fls"
     try:
         dep_file = open(dep_path)
     except FileNotFoundError:
-        click.echo("Cannot find dependency file %s. "
-                   "To create it, add '\\RequirePackage{snapshot}' "
-                   "to the very top of %s and run a full build."
-                   % (dep_path, main_doc), err=True)
+        click.echo("Something went wrong. Cannot find dependency file %s."
+                   % (dep_path,), err=True)
         sys.exit(2)
 
     if os.path.exists(output_dir):  # remove output_dir if already present
@@ -76,16 +76,9 @@ def textract(ctx, zip_file: IO, main_doc: str, output_dir: str,
             if not match:
                 continue
             source = match.group("path")
-            stype = match.group("type")
-            base, ext = os.path.splitext(source)
-            if not ext:  # use implicit extensions of this type
-                candidates = [base + os.path.extsep + e
-                              for e in IMPLICIT_EXT[stype]]
-            else:
-                candidates = [source]
-            for cand in candidates:
-                if os.path.exists(cand):
-                    assets.append(cand)
+            if not os.path.isabs(source):
+                # only include local dependencies
+                assets.append(source)
 
     abs_assets = [os.path.abspath(a) for a in assets]
     click.echo(os.linesep.join(assets))
