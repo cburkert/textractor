@@ -18,6 +18,14 @@ IMPLICIT_EXT = {
 }
 
 
+def prepare_output_dir(ctx, param, value):
+    if not value:
+        tmpdir = tempfile.mkdtemp()
+        value = os.path.join(tmpdir, "textractor")
+        ctx.call_on_close(lambda: shutil.rmtree(tmpdir))
+    return value
+
+
 @click.command()
 @click.argument('zip-file', type=click.File("wb"))
 @click.option('-m', '--main-doc',
@@ -26,12 +34,13 @@ IMPLICIT_EXT = {
               help="Main LaTeX document.")
 @click.option('-o', '--output-dir',
               type=click.Path(dir_okay=True, file_okay=False, exists=False),
-              default=lambda: os.path.join(tempfile.mkdtemp(), "textractor"),
+              callback=prepare_output_dir,
               help="Output directory for clean copy")
 @click.option('-b', '--bib-file',
               type=click.Path(dir_okay=False, file_okay=True, readable=True),
               help="Bib file. Default assumes same name as main-doc.")
-def textract(zip_file: IO, main_doc: str, output_dir: str,
+@click.pass_context
+def textract(ctx, zip_file: IO, main_doc: str, output_dir: str,
              bib_file: str) -> None:
     """Extracting build-essential files from a LaTeX project and zip them."""
     # locate dependency file
