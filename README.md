@@ -1,6 +1,6 @@
 # textractor
 
-Do you find sometimes in need of a neat and clean zip archive with the
+Do you find yourself sometimes in need of a neat and clean zip archive with the
 essential artefacts of your LaTeX project? Maybe to submit it along with the
 camera-ready PDF of your paper?
 
