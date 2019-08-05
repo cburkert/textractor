@@ -6,7 +6,7 @@ with open('README.md') as f:
 
 setup(
     name='textractor',
-    version='0.1.0',
+    version='0.2.0',
     description='Extracting build-essential files from a LaTeX project and zip them.',
     long_description=README,
     long_description_content_type="text/markdown",
