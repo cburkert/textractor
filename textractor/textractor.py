@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import IO
+from typing import IO, List
 import zipfile
 
 
@@ -30,13 +30,17 @@ def prepare_output_dir(ctx, param, value):
 @click.option('-o', '--output-dir',
               type=click.Path(dir_okay=True, file_okay=False, exists=False),
               callback=prepare_output_dir,
-              help="Output directory for clean copy")
+              help="Output directory for clean copy.")
 @click.option('-b', '--bib-file',
               type=click.Path(dir_okay=False, file_okay=True, readable=True),
               help="Bib file. Default assumes same name as main-doc.")
+@click.option('-i', '--include',
+              type=click.Path(dir_okay=False, file_okay=True, readable=True),
+              multiple=True,
+              help="Additional files to include.")
 @click.pass_context
 def textract(ctx, zip_file: IO, main_doc: str, output_dir: str,
-             bib_file: str) -> None:
+             bib_file: str, include: List[str]) -> None:
     """Extracting build-essential files from a LaTeX project and zip them."""
     # record dependency files
     res = subprocess.run(["pdflatex", "-recorder", "-draftmode",
@@ -79,6 +83,9 @@ def textract(ctx, zip_file: IO, main_doc: str, output_dir: str,
             if not os.path.isabs(source):
                 # only include local dependencies
                 assets.append(source)
+
+    # add manual includes to assets
+    assets.extend(include)
 
     abs_assets = [os.path.abspath(a) for a in assets]
     click.echo(os.linesep.join(assets))
