@@ -26,6 +26,6 @@ To be honest: It's not hard. LaTeX's `-recorder` option does the heavy lifting
 by listing all files that are accessed during a build run.
 La TeXtractor just takes all (non-global) build assets from that list and zips
 them up.
-To make sure that everything that is need for a build is included, La
+To make sure that everything that is needed for a build is included, La
 TeXtractor test the build on a copy of the zip,
 and prints a reassuring success message if all goes right.
