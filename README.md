@@ -1,3 +1,5 @@
+[![Latest version on PyPI](https://img.shields.io/pypi/v/latextractor.svg)](https://pypi.org/project/latextractor/)
+
 # La TeXtractor – Get your LaTeX zipped up!
 
 Do you find yourself sometimes in need of a neat and clean zip archive with the
@@ -9,6 +11,13 @@ camera-ready PDF of your paper?
 We present: **La TeXtractor** a tool that takes care of everything for you (no
 warranty!!)
 
+## Installation
+
+La TeXtractor is available on PyPI:
+
+```
+python3 -m pip install latextractor
+```
 
 ## Usage
 
